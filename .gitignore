@@ -1,0 +1,5 @@
+node_modules/
+dist/
+logs/
+*.log
+challenge-4-xu-wei-firebase-adminsdk-fbsvc-a21171c672.json
