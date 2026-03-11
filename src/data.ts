@@ -1,4 +1,4 @@
-import { Project } from "../interfaces/Project";
+import { Project } from "../src/interface_properties";
 
 /**
  * Hardcoded sample project data

@@ -1,10 +1,10 @@
 import express from "express";
 import {
-    createPostHandler,
+    createProjectHandler,
     getAllProjectsHandler,
-    getPostByIdHandler,
-    updatePostHandler,
-    deletePostHandler,
+    getProjectHandler,
+    updateProjectHandler,
+    deleteProjectHandler,
 } from "../controllers/userController";
 import authenticate from "../middleware/authenticate";
 import isAuthorized from "../middleware/authorize";
@@ -26,28 +26,28 @@ router.get(
     "/projects/:id",
     authenticate,
     isAuthorized({ hasRole: ["admin", "lead", "developer"] }),
-    updatePostHandler
+    getProjectHandler
 );
 
 router.post(
     "/projects",
     authenticate,
     isAuthorized({ hasRole: ["admin", "lead"] }),
-    updatePostHandler
+    createProjectHandler
 );
 
 router.put(
     "/projects/:id",
     authenticate,
     isAuthorized({ hasRole: ["admin", "lead"] }),
-    updatePostHandler
+    updateProjectHandler
 );
 
 router.delete(
     "/projects/:id",
     authenticate,
     isAuthorized({ hasRole: ["admin"] }),
-    deletePostHandler
+    deleteProjectHandler
 );
 
 export default router;

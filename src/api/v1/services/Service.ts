@@ -1,6 +1,6 @@
-import projects from "../../../data";
+import { projects } from "../../../data";
 import { Project } from "../../v1/../../interface_properties";
-import { Timestamp } from "firebase-admin/firestore";
+import admin from "firebase-admin";
 
 
 export const createProject = (name: string, status: string):Project => {
@@ -27,7 +27,7 @@ export const createProject = (name: string, status: string):Project => {
 
 export const getAllProjects = () => {
     try{
-        const allProjects:projects[] = projects;
+        const allProjects:Project[] = projects;
         return allProjects;
     }catch (error: unknown) {
         if (error instanceof Error) {
@@ -39,86 +39,55 @@ export const getAllProjects = () => {
 };
 
 
-export const getProject = (id:string): Project => {
-    try{
-        const project = projects.find(p => p.id === id);
+export const getProject = (id: number): Project => {
+    try {
+        const project = projects.find(p => p.id === Number(id));
         if (!project) throw new Error("Project not found");
         return project;
-    }catch (error: unknown) {
+    } catch (error: unknown) {
         if (error instanceof Error) {
-        throw new Error(`Failed to create event: ${error.message}`);
+            throw new Error(`Failed to get project: ${error.message}`);
         } else {
-        throw new Error("Failed to create event: Unknown error");
+            throw new Error("Failed to get project: Unknown error");
         }
     }
 };
 
-/**
- * Update an existing event by ID
- * @param id - Event ID
- * @param data - Partial event data to update
- * @returns Returns the updated Events object, or null if event does not exist
- * @throws Throws an error if update fails
- */
-export const updateEvent = async(id:string, data:Partial<Events>): Promise<Events | null> => {
-    try{
-        const event = await firestoreRepository.getDocumentById("events", id);
-        if(!event || !event.exists) return null;
-        const eventData = event.data()!;
+export const updateProject = (id: number, name?: string, status?: string): Project => {
+  try {
+    const project = projects.find(p => p.id === id);
+    if (!project) throw new Error("Project not found");
 
-        const FIXED_TIME = new Date("2025-12-18T21:24:50.029Z");
+    if (name) project.name = name;
+    if (status) project.status = status;
 
-        const updateEventData: Events = {
-            id: event.id,
-            name: data.name ?? eventData.name,
-            date: data.date ?? eventData.date,
-            capacity: data.capacity ?? eventData.capacity,
-            registrationCount: data.registrationCount ?? eventData.registrationCount,
-            status: data.status ?? eventData.status,
-            category: data.category ?? eventData.category,
-            createdAt: FIXED_TIME,
-            updatedAt: FIXED_TIME,
-        };
-        await firestoreRepository.updateDocument<Events>("events", id, updateEventData);
-        return updateEventData;
-    }catch (error: unknown) {
-        if (error instanceof Error) {
-        throw new Error(`Failed to create event: ${error.message}`);
-        } else {
-        throw new Error("Failed to create event: Unknown error");
-        }
-    }
+    return project;
+  } catch (error: unknown) {
+    if (error instanceof Error) throw new Error(`Failed to update project: ${error.message}`);
+    throw new Error("Failed to update project: Unknown error");
+  }
 };
 
-/**
- * Delete an event by ID
- * @param id - Event ID
- * @returns Returns the deleted Events object, or null if event does not exist
- * @throws Throws an error if deletion fails
- */
-export const deleteEvent = async(id:string):Promise<Events | null> => {
-    try{
-        const doc = await firestoreRepository.getDocumentById("events", id);
-        if(!doc || !doc.exists ) return null;
-        const data = doc.data()!;
-        const deleteData: Events = {
-            id: doc.id,
-            name: data.name,
-            date: data.date instanceof Timestamp ? data.date.toDate() : data.date,
-            capacity: data.capacity,
-            registrationCount: data.registrationCount,
-            status: data.status,
-            category: data.category,
-            createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
-            updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt,
-        };
-        await firestoreRepository.deleteDocument("events", id);
-        return deleteData;
-    }catch (error: unknown) {
-        if (error instanceof Error) {
-        throw new Error(`Failed to create event: ${error.message}`);
-        } else {
-        throw new Error("Failed to create event: Unknown error");
-        }
-    }
+export const deleteProject = (id: number): Project => {
+  try {
+    const index = projects.findIndex(p => p.id === id);
+    if (index === -1) throw new Error("Project not found");
+
+    const deleted = projects.splice(index, 1)[0];
+    return deleted;
+  } catch (error: unknown) {
+    if (error instanceof Error) throw new Error(`Failed to delete project: ${error.message}`);
+    throw new Error("Failed to delete project: Unknown error");
+  }
+};
+
+export const setCustomClaimsService = async (email: string, role: string): Promise<void> => {
+  try {
+    if (!email || !role) throw new Error("Missing email or role");
+
+    await admin.auth().setCustomUserClaims(email, { role });
+  } catch (error: unknown) {
+    if (error instanceof Error) throw new Error(`Failed to set custom claims: ${error.message}`);
+    throw new Error("Failed to set custom claims: Unknown error");
+  }
 };
