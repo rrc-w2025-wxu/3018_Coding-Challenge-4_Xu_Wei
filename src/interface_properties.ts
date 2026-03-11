@@ -7,3 +7,10 @@ export interface HealthCheckResponse {
     timestamp: string;
     version: string;
 }
+
+export interface Project {
+  id: number;        
+  name: string;      
+  status: string;    
+  createdAt: string; 
+}

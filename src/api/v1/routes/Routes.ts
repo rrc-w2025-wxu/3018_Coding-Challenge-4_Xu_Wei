@@ -1,27 +1,54 @@
 import express from "express";
-//import { validateRequest } from "../middleware/validate";
-//import * as Controller from "../controllers/Controller";
-//import { Schemas } from "../validation/Schemas";
-import { itemsHealthCheck } from "../controllers/Controller";
+import {
+    createPostHandler,
+    getAllProjectsHandler,
+    getPostByIdHandler,
+    updatePostHandler,
+    deletePostHandler,
+} from "../controllers/userController";
+import authenticate from "../middleware/authenticate";
+import isAuthorized from "../middleware/authorize";
+import { itemsHealthCheck } from "../controllers/userController";
 
-const router = express.Router();
+const router: express.Router = express.Router();
+
 
 // Health check endpoint
 router.get("/health", itemsHealthCheck);
 
-// Create event - validates body only
-//router.post("/events", validateRequest(Schemas.create), Controller.createController);
+router.get("/projects", 
+    authenticate, 
+    isAuthorized({ hasRole: ["admin", "lead", "developer"] }), 
+    getAllProjectsHandler
+);
 
-// Get all events
-//router.get("/events", Controller.allEventsController);
+router.get(
+    "/projects/:id",
+    authenticate,
+    isAuthorized({ hasRole: ["admin", "lead", "developer"] }),
+    updatePostHandler
+);
 
-// Get a single event - validates body and params
-//router.get("/events/:id", validateRequest(Schemas.getById), Controller.singleEventController);
+router.post(
+    "/projects",
+    authenticate,
+    isAuthorized({ hasRole: ["admin", "lead"] }),
+    updatePostHandler
+);
 
-// Update a single event - validates body and params
-//router.put("/events/:id", validateRequest(Schemas.update), Controller.updateEventController);
+router.put(
+    "/projects/:id",
+    authenticate,
+    isAuthorized({ hasRole: ["admin", "lead"] }),
+    updatePostHandler
+);
 
-// Delete a single event - validates body and params
-//router.delete("/events/:id", validateRequest(Schemas.delete), Controller.deleteEventController);
+router.delete(
+    "/projects/:id",
+    authenticate,
+    isAuthorized({ hasRole: ["admin"] }),
+    deletePostHandler
+);
 
 export default router;
+
